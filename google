@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatGPT Interface</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        #chat { max-width: 600px; margin: auto; }
+        #messages { border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: scroll; }
+        #userInput { width: 100%; padding: 10px; }
+        button { padding: 10px; }
+    </style>
+</head>
+<body>
+    <div id="chat">
+        <h1>Chat with GPT-3.5</h1>
+        <div id="messages"></div>
+        <input type="text" id="userInput" placeholder="Type your message..." />
+        <button id="sendButton">Send</button>
+    </div>
+
+    <script>
+        const apiKey = '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
+'; // Replace with your OpenAI API key
+
+        document.getElementById('sendButton').addEventListener('click', async () => {
+            const userInput = document.getElementById('userInput').value;
+            if (!userInput) return;
+
+            // Display user's message
+            appendMessage(`You: ${userInput}`);
+
+            // Send the message to OpenAI
+            const response = await sendMessageToOpenAI(userInput);
+            if (response) {
+                appendMessage(`ChatGPT: ${response}`);
+            }
+            document.getElementById('userInput').value = '';
+        });
+
+        async function sendMessageToOpenAI(message) {
+            try {
+                const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`,
+                    },
+                    body: JSON.stringify({
+                        model: 'gpt-3.5-turbo',
+                        messages: [{ role: 'user', content: message }],
+                    }),
+                });
+
+                const data = await response.json();
+                return data.choices[0].message.content;
+            } catch (error) {
+                console.error('Error:', error);
+                return 'An error occurred while communicating with ChatGPT.';
+            }
+        }
+
+        function appendMessage(message) {
+            const messagesDiv = document.getElementById('messages');
+            messagesDiv.innerHTML += `<div>${message}</div>`;
+            messagesDiv.scrollTop = messagesDiv.scrollHeight; // Scroll to the bottom
+        }
+    </script>
+</body>
+</html>
